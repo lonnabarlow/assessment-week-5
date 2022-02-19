@@ -24,9 +24,9 @@ module.exports = {
 
             CREATE TABLE cities (
                 city_id serial primary key,
-                name varchar,
+                name varchar (100),
                 rating int,
-                country_id INT NOT NULL REFRENCE countries(country_id)
+                country_id INT NOT NULL REFERENCES countries(country_id)
             );
 
             insert into countries (name)
@@ -245,36 +245,30 @@ module.exports = {
         let {name, rating, countryId} = req.body
         
         sequelize.query(`
-        UPDATE cities
-        SET name = '${name}',
-        rating = '${rating}',
-        countryId = '${countryId}',
+        INSERT INTO cities (name, rating, country_id)
+        VALUES ('${name}', ${rating}, ${countryId})
         `)
-        .then(() => res.sendStatus(200))
+        .then(() => res.sendStatus(200).send(dbRes[0]))
         .catch(err => console.log(err))
       },
 
       getCities: (req, res) => {
           sequelize.query(`
-          SELECT *
+          SELECT ci.city_id, ci.name AS city, ci.rating, co.country_id, co.country_id, co.name AS country
           FROM cities ci
           JOIN countries co
-          ON co_country_id = ic_city_id
-          WHERE country_id = '${countryId}
-
-          UPDATE cities
-          SELECT *
-          FROM cities
-          ORDER BY city_rating DESC;
+          ON co_country_id = ci_country_id
+          ORDER BY ci_rating DESC;
           `)
             .then(dbRes => resizeBy.status(200).send(dbRes[0]))
             .catch(err => console.log(err))
       },
 
        deleteCity: (req, res) => {
+           let {id} = req.params
           sequelize.query(`
-          DELETE FROM city,
-          WHERE id= req.params.id
+          DELETE FROM cities
+          WHERE city_id = ${id}
           `)
           .then(() => res.sendStatus(200).send(dbRes[0]))
           .catch(err => console.log(err))
